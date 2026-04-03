@@ -21,7 +21,7 @@ bin/bump-version   # Bump version (--patch, --minor (default), --major)
 ```
 crates/dkdc-ai-core/       # Core library (dkdc-ai on crates.io)
   src/lib.rs                 # Lifecycle (start/stop/status/logs), model resolution
-crates/dkdc-ai-cli/        # CLI binary (dkdc-ai)
+crates/dkdc-ai-cli/        # CLI binary (ai)
   src/main.rs                # Clap CLI wrapping core library
 crates/dkdc-ai-py/         # PyO3 bindings (cdylib)
 py/dkdc_ai/                # Python wrapper + type stubs

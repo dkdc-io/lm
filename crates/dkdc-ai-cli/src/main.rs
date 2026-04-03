@@ -1,7 +1,7 @@
 use clap::{Parser, Subcommand};
 
 #[derive(Parser, Debug)]
-#[command(name = "dkdc-ai")]
+#[command(name = "ai")]
 #[command(about = "Local LLM inference management via llama-server")]
 #[command(version)]
 struct Args {
@@ -62,7 +62,7 @@ fn run() -> Result<(), dkdc_ai::Error> {
 
     match args.command {
         None => {
-            Args::parse_from(["dkdc-ai", "--help"]);
+            Args::parse_from(["ai", "--help"]);
         }
         Some(Commands::Start {
             model,
@@ -91,7 +91,7 @@ fn run() -> Result<(), dkdc_ai::Error> {
                 }
             } else if tmux_running {
                 println!("Tmux session exists but llama-server may not be responding");
-                println!("Use: dkdc-ai logs");
+                println!("Use: ai logs");
             } else {
                 println!("llama-server is not running");
             }
@@ -102,7 +102,7 @@ fn run() -> Result<(), dkdc_ai::Error> {
                     "llama-server not running (no tmux session '{}')",
                     dkdc_ai::TMUX_SESSION
                 );
-                println!("Use: dkdc-ai start --builtin {}", dkdc_ai::DEFAULT_BUILTIN);
+                println!("Use: ai start --builtin {}", dkdc_ai::DEFAULT_BUILTIN);
                 return Ok(());
             }
             dkdc_ai::attach()?;
@@ -122,9 +122,9 @@ fn print_start_help() {
     );
     println!();
     println!("Commands:");
-    println!("  dkdc-ai attach    # View server output");
-    println!("  dkdc-ai logs      # Show recent logs");
-    println!("  dkdc-ai stop      # Stop server");
+    println!("  ai attach    # View server output");
+    println!("  ai logs      # Show recent logs");
+    println!("  ai stop      # Stop server");
 }
 
 fn resolve_model_source(

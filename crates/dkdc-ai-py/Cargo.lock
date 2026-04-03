@@ -110,7 +110,8 @@ dependencies = [
 [[package]]
 name = "dkdc-sh"
 version = "0.1.0"
-source = "git+https://github.com/dkdc-io/dkdc-sh.git#0101649332af25cd886c012bedf5308bd752a19d"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8cece8c39163cca011d2b8e425f2f6952ad7eae6968a84c5d085a2612286c57a"
 dependencies = [
  "which",
 ]
