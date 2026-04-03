@@ -6,7 +6,7 @@
 [![CI](https://img.shields.io/github/actions/workflow/status/dkdc-io/lm/ci.yml?branch=main&label=CI)](https://github.com/dkdc-io/lm/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-8A2BE2.svg)](https://github.com/dkdc-io/lm/blob/main/LICENSE)
 
-Local LLM inference management via llama-server.
+Language model service.
 
 ## Install
 
