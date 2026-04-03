@@ -1,15 +1,45 @@
 # dkdc-lm
 
-Local LLM inference management via llama-server.
+[![GitHub Release](https://img.shields.io/github/v/release/dkdc-io/lm?color=blue)](https://github.com/dkdc-io/lm/releases)
+[![PyPI](https://img.shields.io/pypi/v/dkdc-lm?color=blue)](https://pypi.org/project/dkdc-lm/)
+[![crates.io](https://img.shields.io/crates/v/dkdc-lm?color=blue)](https://crates.io/crates/dkdc-lm)
+[![CI](https://img.shields.io/github/actions/workflow/status/dkdc-io/lm/ci.yml?branch=main&label=CI)](https://github.com/dkdc-io/lm/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-8A2BE2.svg)](https://github.com/dkdc-io/lm/blob/main/LICENSE)
+
+Language model service.
 
 ## Install
+
+Recommended:
+
+```bash
+curl -LsSf https://dkdc.sh/lm/install.sh | sh
+```
+
+Pre-built binaries are available for Linux and macOS via Python (`uv`). Windows users should install via `cargo` or use macOS/Linux.
+
+uv:
+
+```bash
+uv tool install dkdc-lm
+```
+
+cargo:
 
 ```bash
 cargo install dkdc-lm-cli
 ```
 
+Verify installation:
+
 ```bash
-uv add dkdc-lm
+lm --version
+```
+
+You can use `uvx` to run it without installing:
+
+```bash
+uvx --from dkdc-lm lm
 ```
 
 ## Usage
