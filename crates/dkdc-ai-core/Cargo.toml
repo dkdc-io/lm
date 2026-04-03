@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 authors = ["Cody <cody@dkdc.dev>"]
 description = "Local LLM inference management via llama-server"
-repository = "https://github.com/lostmygithubaccount/dkdc-ai"
+repository = "https://github.com/dkdc-io/dkdc-ai"
 license = "MIT"
 readme = "README.md"
 
