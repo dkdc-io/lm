@@ -62,9 +62,7 @@ fn run() -> Result<(), dkdc_ai::Error> {
 
     match args.command {
         None => {
-            let model_args = dkdc_ai::resolve_builtin(dkdc_ai::DEFAULT_BUILTIN)?;
-            dkdc_ai::start(&model_args, dkdc_ai::DEFAULT_PORT, -1, 4096)?;
-            print_start_help();
+            Args::parse_from(["dkdc-ai", "--help"]);
         }
         Some(Commands::Start {
             model,
