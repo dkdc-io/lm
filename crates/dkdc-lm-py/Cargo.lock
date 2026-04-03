@@ -92,7 +92,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "dkdc-ai"
+name = "dkdc-lm"
 version = "0.1.0"
 dependencies = [
  "dkdc-sh",
@@ -100,10 +100,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "dkdc-ai-py"
+name = "dkdc-lm-py"
 version = "0.1.0"
 dependencies = [
- "dkdc-ai",
+ "dkdc-lm",
  "pyo3",
 ]
 

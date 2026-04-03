@@ -1,4 +1,4 @@
-from dkdc_ai.core import (
+from dkdc_lm.core import (
     default_builtin,
     default_port,
     is_running,

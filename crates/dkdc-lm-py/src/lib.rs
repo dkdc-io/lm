@@ -1,7 +1,7 @@
 use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
 
-fn to_py_err(e: dkdc_ai::Error) -> PyErr {
+fn to_py_err(e: dkdc_lm::Error) -> PyErr {
     PyErr::new::<PyRuntimeError, _>(e.to_string())
 }
 
@@ -10,51 +10,51 @@ fn to_py_err(e: dkdc_ai::Error) -> PyErr {
 #[pyfunction]
 #[pyo3(signature = (model_args, port=8080, gpu_layers=-1, ctx_size=4096))]
 fn start(model_args: Vec<String>, port: u16, gpu_layers: i32, ctx_size: u32) -> PyResult<()> {
-    dkdc_ai::start(&model_args, port, gpu_layers, ctx_size).map_err(to_py_err)
+    dkdc_lm::start(&model_args, port, gpu_layers, ctx_size).map_err(to_py_err)
 }
 
 #[pyfunction]
 fn stop() -> PyResult<()> {
-    dkdc_ai::stop().map_err(to_py_err)
+    dkdc_lm::stop().map_err(to_py_err)
 }
 
 #[pyfunction]
 #[pyo3(signature = (port=8080))]
 fn status(port: u16) -> (bool, bool) {
-    dkdc_ai::status(port)
+    dkdc_lm::status(port)
 }
 
 #[pyfunction]
 #[pyo3(signature = (lines=None))]
 fn logs(lines: Option<usize>) -> PyResult<String> {
-    dkdc_ai::logs(lines).map_err(to_py_err)
+    dkdc_lm::logs(lines).map_err(to_py_err)
 }
 
 #[pyfunction]
 fn resolve_builtin(name: &str) -> PyResult<Vec<String>> {
-    dkdc_ai::resolve_builtin(name).map_err(to_py_err)
+    dkdc_lm::resolve_builtin(name).map_err(to_py_err)
 }
 
 #[pyfunction]
 fn is_running() -> bool {
-    dkdc_ai::is_running()
+    dkdc_lm::is_running()
 }
 
 // -- Constants ----------------------------------------------------------------
 
 #[pyfunction]
 fn default_port() -> u16 {
-    dkdc_ai::DEFAULT_PORT
+    dkdc_lm::DEFAULT_PORT
 }
 
 #[pyfunction]
 fn default_builtin() -> &'static str {
-    dkdc_ai::DEFAULT_BUILTIN
+    dkdc_lm::DEFAULT_BUILTIN
 }
 
 #[pyfunction]
 fn tmux_session() -> &'static str {
-    dkdc_ai::TMUX_SESSION
+    dkdc_lm::TMUX_SESSION
 }
 
 // -- Module -------------------------------------------------------------------

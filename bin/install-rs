@@ -2,7 +2,7 @@
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
-echo "Installing dkdc-ai CLI..."
-cargo install --path crates/dkdc-ai-cli --force
+echo "Installing dkdc-lm CLI..."
+cargo install --path crates/dkdc-lm-cli --force
 
 echo "Rust install complete!"

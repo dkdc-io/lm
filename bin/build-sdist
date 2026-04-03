@@ -2,7 +2,7 @@
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
-echo "Building dkdc-ai sdist..."
+echo "Building dkdc-lm sdist..."
 uv run maturin sdist --out dist
 
 echo "sdist build complete!"

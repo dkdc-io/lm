@@ -1,7 +1,7 @@
 [workspace]
 
 [package]
-name = "dkdc-ai-py"
+name = "dkdc-lm-py"
 version = "0.1.0"
 edition = "2024"
 authors = ["Cody <cody@dkdc.io>"]
@@ -12,5 +12,5 @@ name = "_core"
 crate-type = ["cdylib"]
 
 [dependencies]
-dkdc-ai = { path = "../dkdc-ai-core" }
+dkdc-lm = { path = "../dkdc-lm-core" }
 pyo3 = { version = "0.28", features = ["extension-module", "abi3-py311"] }

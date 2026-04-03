@@ -2,10 +2,10 @@
 set -euo pipefail
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 
-echo "Publishing dkdc-ai to crates.io..."
-cargo publish -p dkdc-ai
+echo "Publishing dkdc-lm to crates.io..."
+cargo publish -p dkdc-lm
 
-echo "Publishing dkdc-ai-cli to crates.io..."
-cargo publish -p dkdc-ai-cli
+echo "Publishing dkdc-lm-cli to crates.io..."
+cargo publish -p dkdc-lm-cli
 
 echo "Published!"

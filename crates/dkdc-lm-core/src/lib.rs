@@ -8,7 +8,7 @@ use std::fmt;
 pub const DEFAULT_PORT: u16 = 8080;
 
 /// Tmux session name for llama-server.
-pub const TMUX_SESSION: &str = "dkdc-ai";
+pub const TMUX_SESSION: &str = "dkdc-lm";
 
 /// Default built-in model preset.
 pub const DEFAULT_BUILTIN: &str = "gemma-4-26b-a4b-it";
@@ -19,7 +19,7 @@ pub const BUILTIN_MODELS: &[(&str, &str)] = &[
     ("gemma-4-e4b-it", "-hf ggml-org/gemma-4-E4B-it-GGUF"),
 ];
 
-/// Errors returned by dkdc-ai operations.
+/// Errors returned by dkdc-lm operations.
 #[derive(Debug)]
 pub enum Error {
     /// llama-server is already running.
@@ -178,7 +178,7 @@ mod tests {
     #[test]
     fn constants() {
         assert_eq!(DEFAULT_PORT, 8080);
-        assert_eq!(TMUX_SESSION, "dkdc-ai");
+        assert_eq!(TMUX_SESSION, "dkdc-lm");
         assert_eq!(DEFAULT_BUILTIN, "gemma-4-26b-a4b-it");
     }
 }

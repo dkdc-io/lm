@@ -1,7 +1,7 @@
 [workspace]
 resolver = "2"
-members = ["crates/dkdc-ai-core", "crates/dkdc-ai-cli"]
-exclude = ["crates/dkdc-ai-py"]
+members = ["crates/dkdc-lm-core", "crates/dkdc-lm-cli"]
+exclude = ["crates/dkdc-lm-py"]
 
 [profile.release]
 lto = true

@@ -62,13 +62,13 @@ jobs:
       - name: Package
         run: |
           staging=$(mktemp -d)
-          cp target/${{ matrix.target }}/release/ai "$staging/"
+          cp target/${{ matrix.target }}/release/lm "$staging/"
           cp LICENSE "$staging/"
-          tar -czf ai-${{ steps.tag.outputs.version }}-${{ matrix.target }}.tar.gz -C "$staging" .
+          tar -czf lm-${{ steps.tag.outputs.version }}-${{ matrix.target }}.tar.gz -C "$staging" .
       - uses: actions/upload-artifact@v4
         with:
-          name: ai-${{ matrix.target }}
-          path: ai-*.tar.gz
+          name: lm-${{ matrix.target }}
+          path: lm-*.tar.gz
           if-no-files-found: error
 
   release:

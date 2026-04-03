@@ -1,0 +1,16 @@
+[package]
+name = "dkdc-lm-cli"
+version = "0.1.0"
+edition = "2024"
+authors = ["Cody <cody@dkdc.io>"]
+description = "CLI for dkdc-lm: local LLM inference management"
+repository = "https://github.com/dkdc-io/lm"
+license = "MIT"
+
+[[bin]]
+name = "lm"
+path = "src/main.rs"
+
+[dependencies]
+dkdc-lm = { version = "0.1", path = "../dkdc-lm-core" }
+clap = { version = "4", features = ["derive"] }

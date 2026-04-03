@@ -40,9 +40,9 @@ BUMP="${BUMP:-minor}"
 
 TOML_FILES=(
   pyproject.toml
-  crates/dkdc-ai-core/Cargo.toml
-  crates/dkdc-ai-cli/Cargo.toml
-  crates/dkdc-ai-py/Cargo.toml
+  crates/dkdc-lm-core/Cargo.toml
+  crates/dkdc-lm-cli/Cargo.toml
+  crates/dkdc-lm-py/Cargo.toml
 )
 
 # ---------- read current version ----------
@@ -85,8 +85,8 @@ done
 echo "Regenerating lock files..."
 cargo generate-lockfile --quiet
 echo "  updated Cargo.lock"
-(cd crates/dkdc-ai-py && cargo generate-lockfile --quiet)
-echo "  updated crates/dkdc-ai-py/Cargo.lock"
+(cd crates/dkdc-lm-py && cargo generate-lockfile --quiet)
+echo "  updated crates/dkdc-lm-py/Cargo.lock"
 uv lock --quiet
 echo "  updated uv.lock"
 

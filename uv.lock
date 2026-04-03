@@ -12,7 +12,7 @@ wheels = [
 ]
 
 [[package]]
-name = "dkdc-ai"
+name = "dkdc-lm"
 version = "0.1.0"
 source = { editable = "." }
 

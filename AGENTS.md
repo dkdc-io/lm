@@ -1,4 +1,4 @@
-# dkdc-ai
+# dkdc-lm
 
 Local LLM inference management via llama-server.
 
@@ -19,12 +19,12 @@ bin/bump-version   # Bump version (--patch, --minor (default), --major)
 ## Architecture
 
 ```
-crates/dkdc-ai-core/       # Core library (dkdc-ai on crates.io)
+crates/dkdc-lm-core/       # Core library (dkdc-lm on crates.io)
   src/lib.rs                 # Lifecycle (start/stop/status/logs), model resolution
-crates/dkdc-ai-cli/        # CLI binary (ai)
+crates/dkdc-lm-cli/        # CLI binary (lm)
   src/main.rs                # Clap CLI wrapping core library
-crates/dkdc-ai-py/         # PyO3 bindings (cdylib)
-py/dkdc_ai/                # Python wrapper + type stubs
+crates/dkdc-lm-py/         # PyO3 bindings (cdylib)
+py/dkdc_lm/                # Python wrapper + type stubs
 ```
 
 ## Dependencies

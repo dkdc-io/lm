@@ -1,7 +1,7 @@
 use clap::{Parser, Subcommand};
 
 #[derive(Parser, Debug)]
-#[command(name = "ai")]
+#[command(name = "lm")]
 #[command(about = "Local LLM inference management via llama-server")]
 #[command(version)]
 struct Args {
@@ -23,7 +23,7 @@ enum Commands {
         #[arg(long)]
         builtin: Option<String>,
         /// Port to listen on
-        #[arg(short, long, default_value_t = dkdc_ai::DEFAULT_PORT)]
+        #[arg(short, long, default_value_t = dkdc_lm::DEFAULT_PORT)]
         port: u16,
         /// Number of GPU layers to offload (-1 = all)
         #[arg(long, default_value_t = -1, allow_hyphen_values = true)]
@@ -37,7 +37,7 @@ enum Commands {
     /// Show llama-server status
     Status {
         /// Port to check
-        #[arg(short, long, default_value_t = dkdc_ai::DEFAULT_PORT)]
+        #[arg(short, long, default_value_t = dkdc_lm::DEFAULT_PORT)]
         port: u16,
     },
     /// Attach to llama-server tmux session
@@ -57,12 +57,12 @@ fn main() {
     }
 }
 
-fn run() -> Result<(), dkdc_ai::Error> {
+fn run() -> Result<(), dkdc_lm::Error> {
     let args = Args::parse();
 
     match args.command {
         None => {
-            Args::parse_from(["ai", "--help"]);
+            Args::parse_from(["lm", "--help"]);
         }
         Some(Commands::Start {
             model,
@@ -74,41 +74,41 @@ fn run() -> Result<(), dkdc_ai::Error> {
         }) => {
             let model_args =
                 resolve_model_source(model.as_deref(), hf.as_deref(), builtin.as_deref())?;
-            dkdc_ai::start(&model_args, port, gpu_layers, ctx_size)?;
+            dkdc_lm::start(&model_args, port, gpu_layers, ctx_size)?;
             print_start_help();
         }
         Some(Commands::Stop) => {
-            dkdc_ai::stop()?;
+            dkdc_lm::stop()?;
             println!("llama-server stopped");
         }
         Some(Commands::Status { port }) => {
-            let (tmux_running, http_responding) = dkdc_ai::status(port);
+            let (tmux_running, http_responding) = dkdc_lm::status(port);
 
             if http_responding {
                 println!("llama-server is running on port {port}");
                 if tmux_running {
-                    println!("Tmux session: {}", dkdc_ai::TMUX_SESSION);
+                    println!("Tmux session: {}", dkdc_lm::TMUX_SESSION);
                 }
             } else if tmux_running {
                 println!("Tmux session exists but llama-server may not be responding");
-                println!("Use: ai logs");
+                println!("Use: lm logs");
             } else {
                 println!("llama-server is not running");
             }
         }
         Some(Commands::Attach) => {
-            if !dkdc_ai::is_running() {
+            if !dkdc_lm::is_running() {
                 println!(
                     "llama-server not running (no tmux session '{}')",
-                    dkdc_ai::TMUX_SESSION
+                    dkdc_lm::TMUX_SESSION
                 );
-                println!("Use: ai start --builtin {}", dkdc_ai::DEFAULT_BUILTIN);
+                println!("Use: lm start --builtin {}", dkdc_lm::DEFAULT_BUILTIN);
                 return Ok(());
             }
-            dkdc_ai::attach()?;
+            dkdc_lm::attach()?;
         }
         Some(Commands::Logs { lines }) => {
-            let output = dkdc_ai::logs(Some(lines))?;
+            let output = dkdc_lm::logs(Some(lines))?;
             print!("{output}");
         }
     }
@@ -118,26 +118,26 @@ fn run() -> Result<(), dkdc_ai::Error> {
 fn print_start_help() {
     println!(
         "llama-server started in tmux session '{}'",
-        dkdc_ai::TMUX_SESSION
+        dkdc_lm::TMUX_SESSION
     );
     println!();
     println!("Commands:");
-    println!("  ai attach    # View server output");
-    println!("  ai logs      # Show recent logs");
-    println!("  ai stop      # Stop server");
+    println!("  lm attach    # View server output");
+    println!("  lm logs      # Show recent logs");
+    println!("  lm stop      # Stop server");
 }
 
 fn resolve_model_source(
     model: Option<&str>,
     hf: Option<&str>,
     builtin: Option<&str>,
-) -> Result<Vec<String>, dkdc_ai::Error> {
+) -> Result<Vec<String>, dkdc_lm::Error> {
     if let Some(m) = model {
         Ok(vec!["-m".into(), m.into()])
     } else if let Some(repo) = hf {
         Ok(vec!["-hf".into(), repo.into()])
     } else {
-        let name = builtin.unwrap_or(dkdc_ai::DEFAULT_BUILTIN);
-        dkdc_ai::resolve_builtin(name)
+        let name = builtin.unwrap_or(dkdc_lm::DEFAULT_BUILTIN);
+        dkdc_lm::resolve_builtin(name)
     }
 }

@@ -188,7 +188,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "dkdc-ai"
+name = "dkdc-lm"
 version = "0.1.0"
 dependencies = [
  "dkdc-sh",
@@ -196,11 +196,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "dkdc-ai-cli"
+name = "dkdc-lm-cli"
 version = "0.1.0"
 dependencies = [
  "clap",
- "dkdc-ai",
+ "dkdc-lm",
 ]
 
 [[package]]
