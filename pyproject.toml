@@ -1,0 +1,31 @@
+[project]
+name = "dkdc-ai"
+version = "0.1.0"
+description = "Local LLM inference management via llama-server"
+authors = [{ name = "Cody", email = "cody@dkdc.dev" }]
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE"]
+readme = "README.md"
+dependencies = []
+
+[dependency-groups]
+dev = ["maturin>=1.0,<2.0", "ruff>=0.9", "ty>=0.0.19", "pytest>=8"]
+
+[tool.maturin]
+module-name = "dkdc_ai.core"
+python-packages = ["dkdc_ai"]
+python-source = "py"
+manifest-path = "crates/dkdc-ai-py/Cargo.toml"
+
+[build-system]
+requires = ["maturin>=1.0,<2.0"]
+build-backend = "maturin"
+
+[tool.uv]
+cache-keys = [
+    { file = "pyproject.toml" },
+    { file = "crates/dkdc-ai-core/**/*.rs" },
+    { file = "crates/dkdc-ai-py/**/*.rs" },
+    { file = "py/dkdc_ai/**/*.py" },
+]

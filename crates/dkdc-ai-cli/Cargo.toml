@@ -1,0 +1,15 @@
+[package]
+name = "dkdc-ai-cli"
+version = "0.1.0"
+edition = "2024"
+authors = ["Cody <cody@dkdc.dev>"]
+license = "MIT"
+
+[[bin]]
+name = "dkdc-ai"
+path = "src/main.rs"
+
+[dependencies]
+dkdc-ai = { path = "../dkdc-ai-core" }
+dkdc-sh = { git = "https://github.com/dkdc-io/dkdc-sh.git" }
+clap = { version = "4", features = ["derive"] }

@@ -1,0 +1,9 @@
+[workspace]
+resolver = "2"
+members = ["crates/dkdc-ai-core", "crates/dkdc-ai-cli"]
+exclude = ["crates/dkdc-ai-py"]
+
+[profile.release]
+lto = true
+strip = true
+codegen-units = 1
