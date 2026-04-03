@@ -1,6 +1,7 @@
 from dkdc_ai.core import (
     default_builtin,
     default_port,
+    is_running,
     logs,
     resolve_builtin,
     start,
@@ -13,6 +14,7 @@ __all__ = [
     "start",
     "stop",
     "status",
+    "is_running",
     "logs",
     "resolve_builtin",
     "default_port",

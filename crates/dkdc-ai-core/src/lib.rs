@@ -1,62 +1,112 @@
 //! Local LLM inference management via llama-server (llama.cpp).
 //!
 //! Manages the llama-server lifecycle (start/stop/status via tmux).
-//! For the AI client library, see `stringflow`.
 
-/// Default port for llama-server
+use std::fmt;
+
+/// Default port for llama-server.
 pub const DEFAULT_PORT: u16 = 8080;
 
-/// Tmux session name for llama-server
+/// Tmux session name for llama-server.
 pub const TMUX_SESSION: &str = "dkdc-ai";
 
-/// Default built-in model preset
+/// Default built-in model preset.
 pub const DEFAULT_BUILTIN: &str = "gemma-4-26b-a4b-it";
 
-/// Known built-in model presets
+/// Known built-in model presets.
 pub const BUILTIN_MODELS: &[(&str, &str)] = &[
     ("gemma-4-26b-a4b-it", "-hf ggml-org/gemma-4-26B-A4B-it-GGUF"),
     ("gemma-4-e4b-it", "-hf ggml-org/gemma-4-E4B-it-GGUF"),
 ];
 
+/// Errors returned by dkdc-ai operations.
+#[derive(Debug)]
+pub enum Error {
+    /// llama-server is already running.
+    AlreadyRunning,
+    /// No active tmux session found.
+    NotRunning,
+    /// The requested built-in model name is unknown.
+    UnknownModel(String),
+    /// An error from a shell command or dependency.
+    Shell(dkdc_sh::Error),
+}
+
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Error::AlreadyRunning => write!(
+                f,
+                "llama-server already running in tmux session '{TMUX_SESSION}'"
+            ),
+            Error::NotRunning => write!(f, "no tmux session '{TMUX_SESSION}'"),
+            Error::UnknownModel(name) => {
+                let available: Vec<&str> = BUILTIN_MODELS.iter().map(|(n, _)| *n).collect();
+                write!(
+                    f,
+                    "unknown built-in model '{name}'. available: {}",
+                    available.join(", ")
+                )
+            }
+            Error::Shell(e) => write!(f, "{e}"),
+        }
+    }
+}
+
+impl std::error::Error for Error {
+    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+        match self {
+            Error::Shell(e) => Some(e),
+            _ => None,
+        }
+    }
+}
+
+impl From<dkdc_sh::Error> for Error {
+    fn from(e: dkdc_sh::Error) -> Self {
+        Error::Shell(e)
+    }
+}
+
+/// Whether the llama-server tmux session exists.
+pub fn is_running() -> bool {
+    dkdc_sh::tmux::has_session(TMUX_SESSION)
+}
+
 /// Start llama-server in a tmux session.
 pub fn start(
-    model_args: &[&str],
+    model_args: &[String],
     port: u16,
     gpu_layers: i32,
     ctx_size: u32,
-) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+) -> Result<(), Error> {
     dkdc_sh::require("llama-server")?;
 
-    if dkdc_sh::tmux::has_session(TMUX_SESSION) {
-        return Err(format!(
-            "llama-server already running in tmux session '{}'",
-            TMUX_SESSION
-        )
-        .into());
+    if is_running() {
+        return Err(Error::AlreadyRunning);
     }
 
     let args = model_args
         .iter()
-        .map(|s| s.to_string())
+        .cloned()
         .chain([
-            "--port".to_string(),
+            "--port".into(),
             port.to_string(),
-            "-ngl".to_string(),
+            "-ngl".into(),
             gpu_layers.to_string(),
-            "-c".to_string(),
+            "-c".into(),
             ctx_size.to_string(),
         ])
-        .collect::<Vec<_>>()
+        .collect::<Vec<String>>()
         .join(" ");
 
-    let cmd = format!("llama-server {}", args);
-    dkdc_sh::tmux::new_session(TMUX_SESSION, &cmd)?;
+    dkdc_sh::tmux::new_session(TMUX_SESSION, &format!("llama-server {args}"))?;
     Ok(())
 }
 
 /// Stop llama-server by killing its tmux session.
-pub fn stop() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    if !dkdc_sh::tmux::has_session(TMUX_SESSION) {
+pub fn stop() -> Result<(), Error> {
+    if !is_running() {
         return Ok(());
     }
     dkdc_sh::tmux::kill_session(TMUX_SESSION)?;
@@ -65,39 +115,38 @@ pub fn stop() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
 /// Check llama-server status. Returns (tmux_running, http_responding).
 pub fn status(port: u16) -> (bool, bool) {
-    let tmux_running = dkdc_sh::tmux::has_session(TMUX_SESSION);
-    let url = format!("http://localhost:{}/health", port);
+    let tmux_running = is_running();
+    let url = format!("http://localhost:{port}/health");
     let http_responding = reqwest::blocking::get(&url)
         .map(|r| r.status().is_success())
         .unwrap_or(false);
     (tmux_running, http_responding)
 }
 
-/// Capture recent logs from the tmux session.
-pub fn logs(lines: Option<usize>) -> Result<String, Box<dyn std::error::Error + Send + Sync>> {
-    if !dkdc_sh::tmux::has_session(TMUX_SESSION) {
-        return Err(format!("no tmux session '{}'", TMUX_SESSION).into());
+/// Attach to the llama-server tmux session.
+pub fn attach() -> Result<(), Error> {
+    if !is_running() {
+        return Err(Error::NotRunning);
     }
-    let output = dkdc_sh::tmux::capture_pane(TMUX_SESSION, lines)?;
-    Ok(output)
+    dkdc_sh::tmux::attach(TMUX_SESSION)?;
+    Ok(())
+}
+
+/// Capture recent logs from the tmux session.
+pub fn logs(lines: Option<usize>) -> Result<String, Error> {
+    if !is_running() {
+        return Err(Error::NotRunning);
+    }
+    Ok(dkdc_sh::tmux::capture_pane(TMUX_SESSION, lines)?)
 }
 
 /// Resolve a built-in model name to llama-server args.
-pub fn resolve_builtin(
-    name: &str,
-) -> Result<Vec<String>, Box<dyn std::error::Error + Send + Sync>> {
+pub fn resolve_builtin(name: &str) -> Result<Vec<String>, Error> {
     let args_str = BUILTIN_MODELS
         .iter()
         .find(|(n, _)| *n == name)
         .map(|(_, args)| *args)
-        .ok_or_else(|| {
-            let available: Vec<&str> = BUILTIN_MODELS.iter().map(|(n, _)| *n).collect();
-            format!(
-                "unknown built-in model '{}'. available: {}",
-                name,
-                available.join(", ")
-            )
-        })?;
+        .ok_or_else(|| Error::UnknownModel(name.to_owned()))?;
     Ok(args_str.split_whitespace().map(String::from).collect())
 }
 
@@ -119,7 +168,11 @@ mod tests {
 
     #[test]
     fn resolve_builtin_unknown() {
-        assert!(resolve_builtin("nonexistent").is_err());
+        let err = resolve_builtin("nonexistent").unwrap_err();
+        assert!(matches!(err, Error::UnknownModel(_)));
+        let msg = err.to_string();
+        assert!(msg.contains("nonexistent"));
+        assert!(msg.contains("gemma-4-26b-a4b-it"));
     }
 
     #[test]

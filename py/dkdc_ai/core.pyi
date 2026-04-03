@@ -15,6 +15,10 @@ def status(port: int = 8080) -> tuple[bool, bool]:
     """Check status. Returns (tmux_running, http_responding)."""
     ...
 
+def is_running() -> bool:
+    """Whether the llama-server tmux session exists."""
+    ...
+
 def logs(lines: int | None = None) -> str:
     """Capture recent logs from the tmux session."""
     ...

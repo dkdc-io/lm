@@ -6,7 +6,7 @@ use clap::{Parser, Subcommand};
 #[command(version)]
 struct Args {
     #[command(subcommand)]
-    command: Commands,
+    command: Option<Commands>,
 }
 
 #[derive(Subcommand, Debug)]
@@ -35,13 +35,17 @@ enum Commands {
     /// Stop llama-server (kill tmux session)
     Stop,
     /// Show llama-server status
-    Status,
+    Status {
+        /// Port to check
+        #[arg(short, long, default_value_t = dkdc_ai::DEFAULT_PORT)]
+        port: u16,
+    },
     /// Attach to llama-server tmux session
     Attach,
     /// Show recent logs from tmux session
     Logs {
         /// Number of lines to show
-        #[arg(short, long, default_value = "50")]
+        #[arg(short, long, default_value_t = 50)]
         lines: usize,
     },
 }
@@ -53,41 +57,37 @@ fn main() {
     }
 }
 
-fn run() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+fn run() -> Result<(), dkdc_ai::Error> {
     let args = Args::parse();
 
     match args.command {
-        Commands::Start {
+        None => {
+            let model_args = dkdc_ai::resolve_builtin(dkdc_ai::DEFAULT_BUILTIN)?;
+            dkdc_ai::start(&model_args, dkdc_ai::DEFAULT_PORT, -1, 4096)?;
+            print_start_help();
+        }
+        Some(Commands::Start {
             model,
             hf,
             builtin,
             port,
             gpu_layers,
             ctx_size,
-        } => {
-            let model_args = resolve_model_source(&model, &hf, &builtin)?;
-            let model_refs: Vec<&str> = model_args.iter().map(|s| s.as_str()).collect();
-            dkdc_ai::start(&model_refs, port, gpu_layers, ctx_size)?;
-
-            println!(
-                "llama-server started in tmux session '{}'",
-                dkdc_ai::TMUX_SESSION
-            );
-            println!();
-            println!("Commands:");
-            println!("  dkdc-ai attach    # View server output");
-            println!("  dkdc-ai logs      # Show recent logs");
-            println!("  dkdc-ai stop      # Stop server");
+        }) => {
+            let model_args =
+                resolve_model_source(model.as_deref(), hf.as_deref(), builtin.as_deref())?;
+            dkdc_ai::start(&model_args, port, gpu_layers, ctx_size)?;
+            print_start_help();
         }
-        Commands::Stop => {
+        Some(Commands::Stop) => {
             dkdc_ai::stop()?;
             println!("llama-server stopped");
         }
-        Commands::Status => {
-            let (tmux_running, http_responding) = dkdc_ai::status(dkdc_ai::DEFAULT_PORT);
+        Some(Commands::Status { port }) => {
+            let (tmux_running, http_responding) = dkdc_ai::status(port);
 
             if http_responding {
-                println!("llama-server is running on port {}", dkdc_ai::DEFAULT_PORT);
+                println!("llama-server is running on port {port}");
                 if tmux_running {
                     println!("Tmux session: {}", dkdc_ai::TMUX_SESSION);
                 }
@@ -98,8 +98,8 @@ fn run() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                 println!("llama-server is not running");
             }
         }
-        Commands::Attach => {
-            if !dkdc_sh::tmux::has_session(dkdc_ai::TMUX_SESSION) {
+        Some(Commands::Attach) => {
+            if !dkdc_ai::is_running() {
                 println!(
                     "llama-server not running (no tmux session '{}')",
                     dkdc_ai::TMUX_SESSION
@@ -107,27 +107,39 @@ fn run() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
                 println!("Use: dkdc-ai start --builtin {}", dkdc_ai::DEFAULT_BUILTIN);
                 return Ok(());
             }
-            dkdc_sh::tmux::attach(dkdc_ai::TMUX_SESSION)?;
+            dkdc_ai::attach()?;
         }
-        Commands::Logs { lines } => {
+        Some(Commands::Logs { lines }) => {
             let output = dkdc_ai::logs(Some(lines))?;
-            print!("{}", output);
+            print!("{output}");
         }
     }
     Ok(())
 }
 
+fn print_start_help() {
+    println!(
+        "llama-server started in tmux session '{}'",
+        dkdc_ai::TMUX_SESSION
+    );
+    println!();
+    println!("Commands:");
+    println!("  dkdc-ai attach    # View server output");
+    println!("  dkdc-ai logs      # Show recent logs");
+    println!("  dkdc-ai stop      # Stop server");
+}
+
 fn resolve_model_source(
-    model: &Option<String>,
-    hf: &Option<String>,
-    builtin: &Option<String>,
-) -> Result<Vec<String>, Box<dyn std::error::Error + Send + Sync>> {
+    model: Option<&str>,
+    hf: Option<&str>,
+    builtin: Option<&str>,
+) -> Result<Vec<String>, dkdc_ai::Error> {
     if let Some(m) = model {
-        Ok(vec!["-m".to_string(), m.clone()])
+        Ok(vec!["-m".into(), m.into()])
     } else if let Some(repo) = hf {
-        Ok(vec!["-hf".to_string(), repo.clone()])
+        Ok(vec!["-hf".into(), repo.into()])
     } else {
-        let name = builtin.as_deref().unwrap_or(dkdc_ai::DEFAULT_BUILTIN);
+        let name = builtin.unwrap_or(dkdc_ai::DEFAULT_BUILTIN);
         dkdc_ai::resolve_builtin(name)
     }
 }
