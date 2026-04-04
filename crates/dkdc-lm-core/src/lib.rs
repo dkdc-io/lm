@@ -223,7 +223,10 @@ mod tests {
     fn builtin_models_have_valid_args() {
         for (name, args_str) in BUILTIN_MODELS {
             assert!(!name.is_empty(), "model name should not be empty");
-            assert!(!args_str.is_empty(), "args for '{name}' should not be empty");
+            assert!(
+                !args_str.is_empty(),
+                "args for '{name}' should not be empty"
+            );
             let parts: Vec<&str> = args_str.split_whitespace().collect();
             assert!(
                 parts.len() >= 2,
@@ -254,7 +257,10 @@ mod tests {
         assert!(msg.contains("available:"));
         // Should list all known models
         for (name, _) in BUILTIN_MODELS {
-            assert!(msg.contains(name), "missing model '{name}' in error message");
+            assert!(
+                msg.contains(name),
+                "missing model '{name}' in error message"
+            );
         }
     }
 
@@ -264,8 +270,6 @@ mod tests {
     fn error_source_non_shell_is_none() {
         assert!(std::error::Error::source(&Error::AlreadyRunning).is_none());
         assert!(std::error::Error::source(&Error::NotRunning).is_none());
-        assert!(
-            std::error::Error::source(&Error::UnknownModel("x".into())).is_none()
-        );
+        assert!(std::error::Error::source(&Error::UnknownModel("x".into())).is_none());
     }
 }
