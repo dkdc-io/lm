@@ -80,6 +80,21 @@ for f in "${TOML_FILES[@]}"; do
   echo "  updated $f"
 done
 
+# ---------- update inter-crate deps ----------
+
+NEW_DEP="$MAJOR.$((MINOR + 1))"
+case "$BUMP" in
+  patch) NEW_DEP="$MAJOR.$MINOR" ;;
+  minor) NEW_DEP="$MAJOR.$((MINOR + 1))" ;;
+  major) NEW_DEP="$((MAJOR + 1)).0" ;;
+esac
+
+OLD_DEP="$MAJOR.$MINOR"
+if [ "$OLD_DEP" != "$NEW_DEP" ]; then
+  sed -i '' "s/dkdc-lm = { version = \"$OLD_DEP\"/dkdc-lm = { version = \"$NEW_DEP\"/" crates/dkdc-lm-cli/Cargo.toml
+  echo "  updated dkdc-lm dep in crates/dkdc-lm-cli/Cargo.toml"
+fi
+
 # ---------- regenerate lock files ----------
 
 echo "Regenerating lock files..."
