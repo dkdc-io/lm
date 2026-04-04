@@ -31,6 +31,11 @@ fn logs(lines: Option<usize>) -> PyResult<String> {
 }
 
 #[pyfunction]
+fn attach() -> PyResult<()> {
+    dkdc_lm::attach().map_err(to_py_err)
+}
+
+#[pyfunction]
 fn resolve_builtin(name: &str) -> PyResult<Vec<String>> {
     dkdc_lm::resolve_builtin(name).map_err(to_py_err)
 }
@@ -67,6 +72,7 @@ mod core {
     fn module_init(m: &Bound<'_, PyModule>) -> PyResult<()> {
         m.add_function(wrap_pyfunction!(start, m)?)?;
         m.add_function(wrap_pyfunction!(stop, m)?)?;
+        m.add_function(wrap_pyfunction!(attach, m)?)?;
         m.add_function(wrap_pyfunction!(status, m)?)?;
         m.add_function(wrap_pyfunction!(logs, m)?)?;
         m.add_function(wrap_pyfunction!(resolve_builtin, m)?)?;
