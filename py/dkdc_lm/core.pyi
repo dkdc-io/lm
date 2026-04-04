@@ -11,6 +11,10 @@ def stop() -> None:
     """Stop llama-server by killing its tmux session."""
     ...
 
+def attach() -> None:
+    """Attach to the llama-server tmux session."""
+    ...
+
 def status(port: int = 8080) -> tuple[bool, bool]:
     """Check status. Returns (tmux_running, http_responding)."""
     ...

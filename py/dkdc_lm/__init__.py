@@ -1,4 +1,5 @@
 from dkdc_lm.core import (
+    attach,
     default_builtin,
     default_port,
     is_running,
@@ -13,6 +14,7 @@ from dkdc_lm.core import (
 __all__ = [
     "start",
     "stop",
+    "attach",
     "status",
     "is_running",
     "logs",

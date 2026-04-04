@@ -63,8 +63,7 @@ lm stop                               # Stop server
 use dkdc_lm::{start, stop, status, resolve_builtin, DEFAULT_PORT};
 
 let args = resolve_builtin("gemma-4-26b-a4b-it")?;
-let refs: Vec<&str> = args.iter().map(|s| s.as_str()).collect();
-start(&refs, DEFAULT_PORT, -1, 4096)?;
+start(&args, DEFAULT_PORT, -1, 4096)?;
 
 let (tmux, http) = status(DEFAULT_PORT);
 println!("tmux: {}, http: {}", tmux, http);
