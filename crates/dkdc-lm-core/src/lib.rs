@@ -154,6 +154,8 @@ pub fn resolve_builtin(name: &str) -> Result<Vec<String>, Error> {
 mod tests {
     use super::*;
 
+    // -- resolve_builtin ------------------------------------------------------
+
     #[test]
     fn resolve_builtin_default() {
         let args = resolve_builtin(DEFAULT_BUILTIN).unwrap();
@@ -167,6 +169,18 @@ mod tests {
     }
 
     #[test]
+    fn resolve_builtin_all_models() {
+        for (name, expected_args_str) in BUILTIN_MODELS {
+            let args = resolve_builtin(name).unwrap();
+            let expected: Vec<String> = expected_args_str
+                .split_whitespace()
+                .map(String::from)
+                .collect();
+            assert_eq!(args, expected, "mismatch for model '{name}'");
+        }
+    }
+
+    #[test]
     fn resolve_builtin_unknown() {
         let err = resolve_builtin("nonexistent").unwrap_err();
         assert!(matches!(err, Error::UnknownModel(_)));
@@ -176,9 +190,82 @@ mod tests {
     }
 
     #[test]
+    fn resolve_builtin_empty_string() {
+        let err = resolve_builtin("").unwrap_err();
+        assert!(matches!(err, Error::UnknownModel(_)));
+    }
+
+    #[test]
+    fn resolve_builtin_case_sensitive() {
+        // Model names are case-sensitive — uppercase should fail
+        assert!(resolve_builtin("Gemma-4-26b-a4b-it").is_err());
+        assert!(resolve_builtin("GEMMA-4-26B-A4B-IT").is_err());
+    }
+
+    // -- constants ------------------------------------------------------------
+
+    #[test]
     fn constants() {
         assert_eq!(DEFAULT_PORT, 8080);
         assert_eq!(TMUX_SESSION, "dkdc-lm");
         assert_eq!(DEFAULT_BUILTIN, "gemma-4-26b-a4b-it");
+    }
+
+    #[test]
+    fn default_builtin_is_in_builtin_models() {
+        assert!(
+            BUILTIN_MODELS.iter().any(|(n, _)| *n == DEFAULT_BUILTIN),
+            "DEFAULT_BUILTIN '{DEFAULT_BUILTIN}' not found in BUILTIN_MODELS"
+        );
+    }
+
+    #[test]
+    fn builtin_models_have_valid_args() {
+        for (name, args_str) in BUILTIN_MODELS {
+            assert!(!name.is_empty(), "model name should not be empty");
+            assert!(!args_str.is_empty(), "args for '{name}' should not be empty");
+            let parts: Vec<&str> = args_str.split_whitespace().collect();
+            assert!(
+                parts.len() >= 2,
+                "args for '{name}' should have at least flag + value"
+            );
+        }
+    }
+
+    // -- Error Display --------------------------------------------------------
+
+    #[test]
+    fn error_display_already_running() {
+        let msg = Error::AlreadyRunning.to_string();
+        assert!(msg.contains(TMUX_SESSION));
+        assert!(msg.contains("already running"));
+    }
+
+    #[test]
+    fn error_display_not_running() {
+        let msg = Error::NotRunning.to_string();
+        assert!(msg.contains(TMUX_SESSION));
+    }
+
+    #[test]
+    fn error_display_unknown_model() {
+        let msg = Error::UnknownModel("bad-model".into()).to_string();
+        assert!(msg.contains("bad-model"));
+        assert!(msg.contains("available:"));
+        // Should list all known models
+        for (name, _) in BUILTIN_MODELS {
+            assert!(msg.contains(name), "missing model '{name}' in error message");
+        }
+    }
+
+    // -- Error trait -----------------------------------------------------------
+
+    #[test]
+    fn error_source_non_shell_is_none() {
+        assert!(std::error::Error::source(&Error::AlreadyRunning).is_none());
+        assert!(std::error::Error::source(&Error::NotRunning).is_none());
+        assert!(
+            std::error::Error::source(&Error::UnknownModel("x".into())).is_none()
+        );
     }
 }
