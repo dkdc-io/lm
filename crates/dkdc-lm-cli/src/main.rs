@@ -1,5 +1,8 @@
 use clap::{Parser, Subcommand};
 
+const DEFAULT_CTX_SIZE: u32 = 4096;
+const DEFAULT_LOG_LINES: usize = 50;
+
 #[derive(Parser, Debug)]
 #[command(name = "lm")]
 #[command(about = "Local LLM inference management via llama-server")]
@@ -29,7 +32,7 @@ enum Commands {
         #[arg(long, default_value_t = -1, allow_hyphen_values = true)]
         gpu_layers: i32,
         /// Context size
-        #[arg(short, long, default_value_t = 4096)]
+        #[arg(short, long, default_value_t = DEFAULT_CTX_SIZE)]
         ctx_size: u32,
     },
     /// Stop llama-server (kill tmux session)
@@ -45,7 +48,7 @@ enum Commands {
     /// Show recent logs from tmux session
     Logs {
         /// Number of lines to show
-        #[arg(short, long, default_value_t = 50)]
+        #[arg(short, long, default_value_t = DEFAULT_LOG_LINES)]
         lines: usize,
     },
 }
